@@ -1,0 +1,206 @@
+
+npm i -d typescritp ts-node
+
+npx ts-node src/index.ts
+
+dependecia que reinicea el servidor
+ primero en package.json 
+ modificar :
+
+  "scripts": {
+    "dev": "npx ts-node src/index.ts"
+  },
+
+  Para escuchar los cambios
+  npm i -d nodemon
+
+  "scripts": {
+    "dev": "nodemon --exec npx ts-node src/index.ts"
+  },
+
+compilar los archivos para produccion
+   crear un archivo llamdo tsconfig.json
+   {
+    "compilerOptions": {
+        "outDir":"./dis",
+        "rootDir":"./src",
+        "lib":["esnext"],
+        "strict":false ,
+        "sourceMap": true ,
+        "esModuleInterop":true ,
+        "declaration":true
+
+    },
+    "include": ["src/**/*.ts"]
+}
+    ejecutar  npx tsc
+
+Instalar express
+  npm i express
+  npm i -d @types/express
+
+Separar rutas 
+  en src crear archivo router.ts
+  
+  opciones para crear la base de datos
+  https://customer.elephantsql.com/login
+  render.com
+
+  Configurar la conexion a la base de datos con sequelize
+  https://sequelize.org/docs/v6/getting-started/
+
+  npm i --save sequelize 
+  npm i  --save  pg pg-hstore #postgres 
+
+ocultar variables instalar npm i dotenv
+
+
+Mostrar mensajes de diferente color en la consola
+     instalr dependecia llamda colors 
+     npm i colors
+     import colors from 'colors'
+
+instalar dependecia para manejar los modelos de la base de datos
+    npm i sequelize-typescript
+
+crear un modelo 
+import { Table, Column, Model , DataType, Default } from "sequelize-typescript";
+
+
+@Table({
+    tableName:'products'
+
+})
+
+class Product extends Model{
+    @Column({type: DataType.STRING(100)})
+    name: string
+
+    @Column({type: DataType.DECIMAL(6,2)})
+    price: number
+     
+    @Column({type: DataType.BOOLEAN})
+    disponible: boolean 
+}
+
+export default Product;
+
+
+En ts config agreagar para que compile la app
+     "experimentalDecorators": true ,
+      "emitDecoratorMetadata": true ,
+
+
+Comemsammos a configurar los verbos creamos una carpeta llada handlers
+
+en tsconfig.json agregmos 
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
+    "module":"NodeNext",
+
+validar datos con express 
+  npm i express-validator
+
+Validar en el router usamos la funcion body que nos otroga la libredia de express
+   router.post(
+  "/",
+
+  body("name").notEmpty().withMessage("nombre dl produto no puede ir vacio"),
+
+  body("price")
+    .isNumeric()
+    .withMessage("valor no valido")
+    .notEmpty()
+    .withMessage("nombre dl produto no puede ir vacio")
+    .custom((value) => value > 0)
+    .withMessage("Precio no valido"),
+
+  createProduct
+);
+
+Validar en le handler  en este caso utilizamo otras funciones check y validation moduleResolution y await al final terminamos con un run 
+
+
+
+  await check('name').notEmpty().withMessage('nombre dl produto no puede ir vacio')
+            .run(req)
+            
+    await check('price')
+            .isNumeric().withMessage('valor no valido')
+            .notEmpty().withMessage('nombre dl produto no puede ir vacio')
+            .custom(value=> value>0).withMessage('Precio no valido')
+            .run(req)
+    
+    let error= validationResult(req)
+    if(!error.isEmpty()) {
+        return res.status(400).json({error: error.array()});
+    }
+
+
+Middleware
+Se refiere a un tipo de sofware intemedio que se utioza para precear las solicitudes HTTP que legan a un aaplicacion web
+antes de ser manjadas por la funcion de enrutamineto pricipal 
+
+Los middleware son funciones que se ejecutan en el medio del flujo de solicitun y respuesta de una plicacion web y pueden realizar diversas
+tareas , como utitenticacion, validacion de datos , registro de solicitudes, comprension de respuestas ,entre otras.
+
+Es escencia para creaciones de aplicaciones web robusts y flexibles 
+
+Diferencias put y patch
+  put cabia toda la informacion con lo que le enviamos asi que si no le enviamos un dato lo cabiara y se perdera
+  patch modifica solo lo que le enviemos dejando los demas datos sin modifificar 
+
+TESTING  con Supertest y jest
+  npm i -D supertest @types/supertest jest @types/jest ts-jest
+  npx ts-jest config:init
+
+  jest puede lee archivos de 3 formas:
+      Archivos con la extencion .test.js
+      archivos con la extencion .spec.js
+      Archivos dentro de la carpeta __test__
+  
+  Ejecutar las pruebas npm test
+  reviar que el package.json este test si no agragarlo
+    "scripts": {
+    "dev": "nodemon --exec npx ts-node src/index.ts",
+    "test" :"jest"
+  },
+
+  limpiar la base de datos para no llenarnos de datos con las pruevas crear una carpeta llada data dentro un index.ts
+  importar dos dependencias 
+       import {exit } from 'node:process'
+
+Agregamos un nuevo escrip que para ejecutar en consola este sera el de pretest es un comando especial que se ejecutaa antes del test en el package.json 
+"scripts": {
+    "dev": "nodemon --exec npx ts-node src/index.ts",
+    "test" :"jest --detectOpenHandles",
+    "pretest": "ts-node ./src/data --clear"
+  },
+
+
+  const clearDB = async () =>{
+    try {
+        await db.sync({force: true})
+        exit()
+    } catch (error) {
+        console.log(error)
+        exit(1)
+    }
+}
+
+if(process.argv[2] ==='--clearDB'){
+    clearDB()
+}
+
+Para saver que porcentaje de pruebas existen el el codigo usamos coverage
+ "scripts": {
+    "dev": "nodemon --exec npx ts-node src/index.ts",
+    "test" :"jest --forceExit --detectOpenHandle",
+    "test:coverage" :"jest --forceExit --detectOpenHandle --coverage",
+    "pretest": "ts-node ./src/data --clear"
+  },
+
+  Documentar  la API 
+  instalar :
+          npm i  -D swagger-jsdoc swagger-ui-express 
+          npm i -D @types/swagger-jsdoc @types/swagger-ui-express
